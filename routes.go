@@ -14,6 +14,12 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 	// 解决跨域问题
 	r.Use(CORSMiddleware())
 
+	// 房间
+	room := r.Group("api/room")
+	{
+		room.GET("/newroom", controller.NewRoom)
+	}
+
 	// 登陆和注册
 	auth := r.Group("/api/auth")
 	{
@@ -26,23 +32,25 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 
 	lounge := r.Group("/api/lobby")
 	{
+		lounge.GET("", controller.Info)
 		// 进入游戏大厅
-		lounge.GET("", controller.Restroom)
+		// lounge.GET("", controller.Restroom)
 		// 开始匹配
-		lounge.POST("", controller.Match)
+		// lounge.POST("", controller.Match)
 	}
 
 	// 都需要加验证中间件
 	game := r.Group("/api/game")
 	{
-		// 进入游戏
+		// // 进入游戏
 		game.GET("/api/:roomid", controller.Game)
-		// 更新位置
-		game.PATCH("/api/:roomid", controller.Update)
-		// 有人被找到/胜利
-		game.POST("/api/:roomid", controller.Condition)
-		// 退出房间
-		game.DELETE("/api/:roomid", controller.Exit)
+		// // 更新位置
+		// game.PATCH("/api/:roomid", controller.Update)
+		// // 有人被找到/胜利
+		// game.POST("/api/:roomid", controller.Condition)
+		// // 退出房间
+		// game.DELETE("/api/:roomid", controller.Exit)
+		game.GET("", controller.Info)
 	}
 
 	Logger().Debug("routes initialized...")
