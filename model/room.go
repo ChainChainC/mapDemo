@@ -2,18 +2,16 @@ package model
 
 type Room struct {
 	// 可以不存?
-	RoomId string
-	// 存储所有玩家指针(切片)
-	AllPlayer []*Player
-	// TODO Map信息
+	RoomId IdentifyType
+	// 存储所有玩家指针(切片)-->玩家退出的话，需要及时判断退出玩家，并将其从切片中删除
+	// TODO：删除操作要上锁，可能存在并发问题 -> 读写锁
+	AllPlayer map[IdentifyType]*Player
+	// room 状态
+	RoomState int8
+	// TODO：Map信息
 }
 
-func NewRoom() *Room {
-	r := &Room{
-		RoomId:    "test",
-		AllPlayer: make([]*Player, 4),
-	}
-	// 创建好的房间加入全局表
-	RoomIdMap[r.RoomId] = r
-	return r
+// NewRoomReq ------------- NewRoom ------------
+type NewRoomReq struct {
+	Uuid IdentifyType
 }
