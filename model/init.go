@@ -11,15 +11,15 @@ type (
 
 // 坐标
 type Pos struct {
-	x float32
-	y float32
-	z float32
+	X float32
+	Y float32
+	Z float32
 }
 
 // 存储所有房间的全局MAP
 // TODO, 后续全局Map考虑放入redis, string or int ->于paler下的roomId关联
 var (
-	RoomIdMap   = make(M, 4)
+	RoomIdMap   = make(map[IdentifyType]*Room, 4)
 	PlayerIdMap = make(map[IdentifyType]*Player, 32)
 )
 

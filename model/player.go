@@ -28,8 +28,22 @@ type NewPlayerReq struct {
 	Uuid IdentifyType `json:"openId"`
 }
 
-type PlayerUpdatePos struct {
+// 玩家更新坐标
+type PlayerUpdatePosReq struct {
 	Name      string       `json:"nickName"`
 	Uuid      IdentifyType `json:"openId"`
-	PlayerPos Pos
+	PlayerPos Pos          `json:"playerPos"`
+}
+
+// 玩家加入房间
+type PlayerJoinRoomReq struct {
+	Name     string       `json:"nickName"`
+	Uuid     IdentifyType `json:"openId"`
+	RoomUuid IdentifyType `json:"roomUuid"`
+}
+
+type PlayerQuitRoomReq struct {
+	Name     string       `json:"nickName"`
+	Uuid     IdentifyType `json:"openId"`
+	RoomUuid IdentifyType `json:"roomUuid"`
 }
