@@ -17,11 +17,12 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 	// 房间
 	room := r.Group("api/room")
 	{
-		room.POST("/newroom", controller.NewRoom)
+		room.POST("/NewRoom", controller.NewRoom)
 	}
 	player := r.Group("api/player")
 	{
-		player.POST("/newplayer", controller.NewPlayer)
+		player.POST("/NewPlayer", controller.NewPlayer)
+		player.POST("/PlayerUpdatePos", controller.PlayerUpdatePos)
 	}
 
 	// 登陆和注册
