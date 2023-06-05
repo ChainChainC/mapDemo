@@ -21,14 +21,14 @@ The naming follow the style in https://google.github.io/styleguide/go/best-pract
 --PlayerQuitRoom：玩家退出房间
 上述：玩家登录，加入房间、退出房间逻辑基本完成
 
-# -----------项目结构书写指导-------------
+### -----------项目结构书写指导-------------
 --model中定义基本对象的struct，以及一些全局变量
 --每一个请求需要对应一个controller的Req struct，用于接收请求的body数据（统一流程）
 ------后续结构更改
 1、将controller和业务逻辑分离开，controllerReqHandler处理请求进入，并进行一些合法性验证
 --业务逻辑迁移到单独的controller/player.go文件下，主要进行业务逻辑实现；
 
-# -----------------------------------------------
+### -----------------------------------------------
 jwt签发token, token中包含表名，用户id，地理位置
 
 数据库保存用户id和 昵称 
