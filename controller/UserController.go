@@ -80,14 +80,14 @@ func Register(ctx *gin.Context) {
 	DB.Create(&newUser)
 
 	// 发放token
-	token, err := common.ReleaseToken(newUser)
+	// token, err := common.ReleaseToken(newUser)
 	if err != nil {
 		response.Response(ctx, http.StatusInternalServerError, 500, nil, "系统异常")
 		log.Printf("token generate error : %v", err)
 		return
 	}
 
-	response.Success(ctx, gin.H{"token": token}, "注册成功")
+	// response.Success(ctx, gin.H{"token": token}, "注册成功")
 }
 
 func Login(ctx *gin.Context) {
@@ -123,15 +123,15 @@ func Login(ctx *gin.Context) {
 	}
 
 	// 发放token
-	token, err := common.ReleaseToken(user)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "系统异常"})
-		log.Printf("token generate error : %v", err)
-		return
-	}
+	// token, err := common.ReleaseToken(user)
+	// if err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "系统异常"})
+	// 	log.Printf("token generate error : %v", err)
+	// 	return
+	// }
 
 	// 返回结果
-	response.Success(ctx, gin.H{"token": token}, "登录成功")
+	// response.Success(ctx, gin.H{"token": token}, "登录成功")
 }
 
 func Info(ctx *gin.Context) {

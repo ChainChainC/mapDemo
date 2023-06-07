@@ -24,15 +24,19 @@ type Player struct {
 // NewPlayerReq 请求体
 type NewPlayerReq struct {
 	// ---玩家信息
-	Name string       `json:"nickName"`
-	Uuid IdentifyType `json:"openId"`
+	Name      string       `json:"nickName"`
+	Uuid      IdentifyType `json:"openId"`
+	PlayerPos Pos          `json:"playerPos"`
 }
+
+//
 
 // 玩家更新坐标
 type PlayerUpdatePosReq struct {
 	Name      string       `json:"nickName"`
 	Uuid      IdentifyType `json:"openId"`
 	PlayerPos Pos          `json:"playerPos"`
+	Jwt       string       `json:"jwt"`
 }
 
 // 玩家加入房间
@@ -40,10 +44,12 @@ type PlayerJoinRoomReq struct {
 	Name     string       `json:"nickName"`
 	Uuid     IdentifyType `json:"openId"`
 	RoomUuid IdentifyType `json:"roomUuid"`
+	Jwt      string       `json:"jwt"`
 }
 
 type PlayerQuitRoomReq struct {
 	Name     string       `json:"nickName"`
 	Uuid     IdentifyType `json:"openId"`
 	RoomUuid IdentifyType `json:"roomUuid"`
+	Jwt      string       `json:"jwt"`
 }
