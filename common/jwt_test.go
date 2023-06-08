@@ -26,10 +26,11 @@ func TestParseToken(t *testing.T) {
 		t.Fail()
 	}
 	// fmt.Println(res)
-	token, clams, err := ParseToken(res)
+	token, clamis, err := ParseToken(res)
 	fmt.Println(token)
-	if clams.PlayerUuid != player.Uuid {
+	if clamis.PlayerUuid != player.Uuid {
 		t.Error("解析玩家uuid错误")
 	}
-	fmt.Println(clams.PlayerUuid)
+	fmt.Println(clamis.PlayerUuid)
+	fmt.Println(clamis.StandardClaims.ExpiresAt)
 }
