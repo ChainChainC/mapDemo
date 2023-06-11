@@ -51,7 +51,8 @@ func PlayerUpdatePos(c *gin.Context) {
 		// 玩家在房间内，那么需要走另外的处理逻辑
 		if p.InRoom {
 			// 返回所有可见玩家位置
-			c.JSON(200, gin.H{"code": 200, "data": "其它可见玩家坐标", "msg": "PlayerUpdatePos:玩家位置更新成功，返回可见玩家位置"})
+			res := getPlayerPosInsight(p)
+			c.JSON(200, gin.H{"code": 200, "data": res, "msg": "PlayerUpdatePos:玩家位置更新成功，返回可见玩家位置"})
 			return
 		} else {
 			c.JSON(200, gin.H{"code": 200, "data": p.PlayerPos, "msg": "PlayerUpdatePos玩家位置更新成功"})

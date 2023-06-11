@@ -4,6 +4,7 @@ import (
 	"errors"
 	"mapDemo/common"
 	"mapDemo/model"
+	"math"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -33,6 +34,7 @@ func newPlayer(req *model.NewPlayerReq) *model.Player {
 		InRoom:       false,
 		PlayerOnline: true,
 		PlayerJwt:    tokenString,
+		Sight:        10,
 	}
 	// 创建好的玩家加入到全局玩家Map中
 	// TODO：并发性问题
@@ -96,6 +98,19 @@ func deletePlayerFromRoom(p *model.Player) error {
 }
 
 // 计算可见玩家坐标
-func getPlayerPosInsight() {
-
+func getPlayerPosInsight(p *model.Player) []*model.Player {
+	allP := model.RoomIdMap[p.RoomId].AllPlayer
+	res := make([]*model.Player, 2)
+	for k, v := range allP {
+		if k != p.Uuid {
+			deltaX := p.PlayerPos.X - v.PlayerPos.X
+			deltaY := p.PlayerPos.Y - v.PlayerPos.Y
+			deltaZ := p.PlayerPos.Z - v.PlayerPos.Z
+			distance := math.Sqrt(float64(deltaX*deltaX) + float64(deltaY*deltaY) + float64(deltaZ*deltaZ))
+			if distance < float64(p.Sight) {
+				res = append(res, v)
+			}
+		}
+	}
+	return res
 }

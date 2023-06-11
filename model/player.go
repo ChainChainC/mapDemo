@@ -19,6 +19,8 @@ type Player struct {
 	PlayerOnline bool
 	// 玩家token
 	PlayerJwt string
+	// 玩家视野
+	Sight uint32
 }
 
 // NewPlayerReq 请求体
