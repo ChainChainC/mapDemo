@@ -23,6 +23,8 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 	{
 		player.POST("/NewPlayer", controller.NewPlayer)
 		player.POST("/PlayerUpdatePos", controller.PlayerUpdatePos)
+		player.POST("/PlayerJoinRoom", controller.PlayerJoinRoom)
+		player.POST("/PlayerQuitRoom", controller.PlayerQuitRoom)
 	}
 
 	// 登陆和注册

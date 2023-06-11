@@ -25,14 +25,10 @@ func newPlayer(req *model.NewPlayerReq) *model.Player {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, _ := token.SignedString(jwtKey)
 	np := &model.Player{
-		Name:       "test player",
-		Uuid:       req.Uuid,
-		PlayerType: 0,
-		PlayerPos: model.Pos{
-			X: 1.0,
-			Y: 1.0,
-			Z: 1.0,
-		},
+		Name:         req.Name,
+		Uuid:         req.Uuid,
+		PlayerType:   0,
+		PlayerPos:    req.PlayerPos,
 		RoomId:       "",
 		InRoom:       false,
 		PlayerOnline: true,
