@@ -59,10 +59,6 @@ type PlayerQuitRoomReq struct {
 
 // ---------------Redis精简--------------
 
-type PlayerBaseReq struct {
-	Jwt string `json:"jwt"`
-}
-
 type NewPlayerBaseReq struct {
 	Code *string `Json:"code"`
 	Jwt  *string `json:"jwt"`
