@@ -1,107 +1,140 @@
 package controller
 
 import (
+	"fmt"
+	"mapDemo/common"
 	"mapDemo/model"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
 var jwtKey = []byte("a_secret_crect")
 
 func NewPlayer(c *gin.Context) {
-	npReq := &model.NewPlayerReq{}
-	c.BindJSON(npReq)
-	// 去全局中查找玩家是否存在
-	if v, ok := model.PlayerIdMap[npReq.Uuid]; ok {
-		// 玩家存在，判断jwt是否过期
-		if v.Uuid == "" {
-			// TODO: 抛出异常
-		}
-		if v.PlayerJwt == "" {
-			// TODO: 分发jwt
-		}
-		//
-		c.JSON(200, gin.H{"code": 200, "data": "v", "msg": "玩家重连接入"})
-	} else {
-		// TODO:如果发现openId为空, 抛出异常
-		expirationTime := time.Now().Add(24 * time.Hour) // 有效期
-		claims := &model.Claims{
-			Uuid: npReq.Uuid,
-			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: expirationTime.Unix(), // 过期时间
-				IssuedAt:  time.Now().Unix(),     // 发放时间
-				Issuer:    "binbin",              // 发放者
-				Subject:   "user token",          // 主题
-			},
-		}
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, _ := token.SignedString(jwtKey)
-		np := &model.Player{
-			Name:       "test player",
-			Uuid:       npReq.Uuid,
-			PlayerType: 0,
-			PlayerPos: model.Pos{
-				X: 1.0,
-				Y: 1.0,
-				Z: 1.0,
-			},
-			RoomId:       "",
-			InRoom:       false,
-			PlayerOnline: true,
-			PlayerJwt:    tokenString,
-		}
-		// 创建好的玩家加入到全局玩家Map中
-		// TODO：并发性问题
-		model.PlayerIdMap[np.Uuid] = np
-		c.JSON(200, gin.H{"code": 200, "data": np.Uuid + " Jwt: " + np.PlayerJwt, "msg": "新玩家接入"})
-	}
+	newPlayerRedis(c)
+}
 
+func newPlayerRedis(c *gin.Context) {
+	baseReq := &model.NewPlayerBaseReq{}
+	c.BindJSON(baseReq)
+	if baseReq.Jwt != nil {
+		// 解析jwt，写入redis
+	} else {
+		// 用code获取openId
+		openId := baseReq.Code
+		// 签发jwt
+		jwt, err := newJwt(openId)
+		if err != nil {
+			c.JSON(200, gin.H{"code": 200, "data": *baseReq.Code, "msg": "新玩家接入时jwt签发失败"})
+			return
+		}
+		// TODO：直接更新，如果玩家在线，是不是无法连接回房间内
+		err = common.LocalRedisClient.UpdatePlayer(openId, &map[string]interface{}{
+			"PlayerType": 0,
+			"RoomId":     "",
+			// "PlayerOnline": 1,
+		})
+		if err != nil {
+			c.JSON(200, gin.H{"code": 200, "data": *baseReq.Code, "msg": "玩家信息写入redis失败"})
+		}
+		c.JSON(200, gin.H{"code": 200, "data": *baseReq.Code + " Jwt: " + *jwt, "msg": "新玩家接入"})
+	}
 }
 
 // 玩家后续隔一段时间向服务器发起更新位置请求
 func PlayerUpdatePos(c *gin.Context) {
-	pupReq := &model.PlayerUpdatePosReq{}
-	c.BindJSON(pupReq)
-	// 获取玩家数据
-	// TODO：做玩家合法性验证
-	// 更新玩家位置
-	if v, ok := model.PlayerIdMap[pupReq.Uuid]; ok {
-		// TODO：验证玩家各项信息合法性（是否超时）
-		v.PlayerPos = pupReq.PlayerPos
-		// 玩家在房间内，那么需要走另外的处理逻辑
-		if v.InRoom {
-			// 返回所有可见玩家位置
-			c.JSON(200, gin.H{"code": 200, "data": "其它可见玩家坐标", "msg": "玩家位置更新成功，返回可见玩家位置"})
-		} else {
-			c.JSON(200, gin.H{"code": 200, "data": v.PlayerPos, "msg": "玩家位置更新成功"})
-		}
+	req := &model.PlayerUpdatePosBaseReq{}
+	c.BindJSON(req)
+	uuid, err := verifyJwtUuid(req.Jwt)
+	if err != nil {
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "updatePos verifyJwt失败"})
+		return
+	}
+	// 更新Pos
+	err = common.LocalRedisClient.UpdatePos(uuid, req.Pos)
+	if err != nil {
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "updatePos Redis更新pos失败"})
+		return
+	}
+	// 在房间内
+	if req.Type != 0 {
+		// TODO：获取全部玩家坐标，并判断可见性
 	} else {
-		// TODO: 玩家状态不在线，抛出提示,让玩家重新登录
-		c.JSON(200, gin.H{"code": 100, "data": nil, "msg": "玩家不在服务器，请重新登录"})
+		c.JSON(200, gin.H{"code": 100, "data": req.Pos, "msg": "更新玩家坐标成功，玩家不在房间内"})
+		return
 	}
 }
 
+// PlayerJoinRoom 玩家申请加入房间
 func PlayerJoinRoom(c *gin.Context) {
-	pjrReq := &model.PlayerJoinRoomReq{}
-	c.BindJSON(pjrReq)
-	if v, ok := model.PlayerIdMap[pjrReq.Uuid]; ok {
-		if r, ok := model.RoomIdMap[pjrReq.RoomUuid]; ok {
-			// 玩家加入列表
-			r.AllPlayer[v.Uuid] = v
-			// TODO:返回其他玩家位置 做成工具, 会频繁调用
-			c.JSON(200, gin.H{"code": 100, "data": "返回房间内其它玩家位置", "msg": "玩家成功加入房间"})
-		} else {
-			// 报错, 房间号不存在
-			c.JSON(100, gin.H{"code": 100, "data": nil, "msg": "加入房间失败, 房间不存在"})
-		}
-	} else {
-		// TODO: 处理玩家不在线
-		c.JSON(100, gin.H{"code": 100, "data": nil, "msg": "玩家加入房间，玩家状态不在线"})
+	req := &model.PlayerJoinRoomBaseReq{}
+	c.BindJSON(req)
+	uuid, err := verifyJwtUuid(req.Jwt)
+	if err != nil {
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom verifyJwt失败"})
+		return
 	}
+	// 查询redis缓存字段，uuid RoomId，如果redis查不到，需要重新登录
+	fileds := &[]string{"PlayerType", "RoomId"}
+	vals, err := common.LocalRedisClient.GetPlayerInfoByField(uuid, fileds)
+	if err != nil {
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 查询用户信息失败"})
+		return
+	}
+	fmt.Print(vals)
+	if (*vals)[0] == nil {
+		// 玩家不在线
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 玩家缓存丢失，请重新登录"})
+		return
+	}
+	// 判断RoomId是否为空 or 为无效房间号
+	if (*vals)[1] == nil || (*vals)[1] == "" {
+		// 无效房间号
+	} else {
+		// 有效房间号，退出之前房间
+		rStr, ok := (*vals)[1].(string)
+		if !ok {
+			c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 房间号类型断言失败"})
+			return
+		}
+		if err := common.LocalRedisClient.UpdateRoom(uuid, &rStr, 0); err != nil {
+			c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 房间退出失败"})
+			return
+		}
+	}
+	// 更新玩家信息
+	err = common.LocalRedisClient.UpdatePlayer(uuid, &map[string]interface{}{
+		"RoomId":     req.RoomId,
+		"PlayerType": 1,
+	})
+	if err != nil {
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 玩家信息修改失败"})
+		return
+	}
+	// 房间加入玩家uuid
+	err = common.LocalRedisClient.UpdateRoom(uuid, req.RoomId, 1)
+	if err != nil {
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 房间信息更新失败"})
+		return
+	}
+	// TODO：获取房间内玩家坐标返回
 }
 
+// PlayerQuitRoom 玩家退出房间
 func PlayerQuitRoom(c *gin.Context) {
-
+	req := &model.PlayerQuitRoomBaseReq{}
+	c.BindJSON(req)
+	uuid, err := verifyJwtUuid(req.Jwt)
+	if err != nil {
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerQuitRoom verifyJwt失败"})
+		return
+	}
+	if err := common.LocalRedisClient.UpdateRoom(uuid, req.RoomId, 0); err != nil {
+		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerQuitRoom 房间退出失败"})
+		return
+	}
+	err = common.LocalRedisClient.UpdatePlayer(uuid, &map[string]interface{}{
+		"RoomId":     "",
+		"PlayerType": 0,
+	})
 }
