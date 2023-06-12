@@ -11,7 +11,8 @@ type Room struct {
 	// TODO：Map信息
 }
 
-// NewRoomReq ------------- NewRoom ------------
-type NewRoomReq struct {
-	Uuid IdentifyType
+// NewRoomReq ------------- Redis version ------------
+type NewRoomBaseReq struct {
+	Jwt *string `json:"jwt"`
+	Pos *Pos    `json:"pos"`
 }

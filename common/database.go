@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"mapDemo/model"
 
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
@@ -31,7 +30,7 @@ func InitDB() *gorm.DB {
 		panic("failed to connect database, err: " + err.Error())
 	}
 
-	db.AutoMigrate(&model.User{}) // 自动创建数据库表
+	// db.AutoMigrate(&model.User{}) // 自动创建数据库表
 
 	DB = db
 	return db

@@ -9,15 +9,15 @@ import (
 
 var jwtKey = []byte("a_secret_crect")
 
-type Claims struct {
-	PlayerUuid string
-	jwt.StandardClaims
-}
+// type Claims struct {
+// 	Uuid IdentifyType
+// 	jwt.StandardClaims
+// }
 
 func ReleaseToken(player model.Player) (string, error) {
 	expirationTime := time.Now().Add(7 * 24 * time.Hour) // 有效期7天
-	claims := &Claims{
-		PlayerUuid: player.Uuid,
+	claims := &model.Claims{
+		Uuid: player.Uuid,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(), // 过期时间
 			IssuedAt:  time.Now().Unix(),     // 发放时间
@@ -33,8 +33,8 @@ func ReleaseToken(player model.Player) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
-	claims := &Claims{}
+func ParseToken(tokenString string) (*jwt.Token, *model.Claims, error) {
+	claims := &model.Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (i interface{}, err error) {
 		return jwtKey, nil
