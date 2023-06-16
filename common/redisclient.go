@@ -11,6 +11,7 @@ import (
 )
 
 var LocalRedisClient *RedisClientApp
+// var LocalRedisClient = NewRedisClientApp()
 
 type RedisClientApp struct {
 	client *redis.Client
