@@ -1,11 +1,16 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"mapDemo/common"
+
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
 
 	r := gin.Default()
 	r = CollectRoute(r)
+	common.NewRedisClientApp()
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",

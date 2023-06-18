@@ -20,6 +20,10 @@ func newPlayerRedis(c *gin.Context) {
 	if baseReq.Jwt != nil {
 		// 解析jwt，写入redis
 	} else {
+		if baseReq.Code == nil {
+			c.JSON(200, gin.H{"code": 200, "data": "", "msg": "新玩家接入，未传入code"})
+			return
+		}
 		// 用code获取openId
 		openId := baseReq.Code
 		// 签发jwt
@@ -29,7 +33,8 @@ func newPlayerRedis(c *gin.Context) {
 			return
 		}
 		// TODO：直接更新，如果玩家在线，是不是无法连接回房间内
-		err = common.LocalRedisClient.UpdatePlayer(openId, &map[string]interface{}{
+		// 不能传入指针
+		err = common.LocalRedisClient.UpdatePlayer(openId, map[string]interface{}{
 			"PlayerType": 0,
 			"RoomId":     "",
 			// "PlayerOnline": 1,
@@ -57,6 +62,7 @@ func PlayerUpdatePos(c *gin.Context) {
 		return
 	}
 	// 在房间内
+	// TODO：是否在房间内需要从前端携带Type？那如果玩家掉线前端缓存出错会不会产生问题
 	if req.Type != 0 {
 		// TODO：获取全部玩家坐标，并判断可见性
 	} else {
@@ -68,7 +74,9 @@ func PlayerUpdatePos(c *gin.Context) {
 // PlayerJoinRoom 玩家申请加入房间
 func PlayerJoinRoom(c *gin.Context) {
 	req := &model.PlayerJoinRoomBaseReq{}
-	c.BindJSON(req)
+	if err := c.BindJSON(req); err != nil {
+		return
+	}
 	uuid, err := verifyJwtUuid(req.Jwt)
 	if err != nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom verifyJwt失败"})
@@ -77,7 +85,7 @@ func PlayerJoinRoom(c *gin.Context) {
 	// 查询redis缓存字段，uuid RoomId，如果redis查不到，需要重新登录
 	fileds := &[]string{"PlayerType", "RoomId"}
 	vals, err := common.LocalRedisClient.GetPlayerInfoByField(uuid, fileds)
-	if err != nil {
+	if err != nil || vals == nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 查询用户信息失败"})
 		return
 	}
@@ -103,8 +111,8 @@ func PlayerJoinRoom(c *gin.Context) {
 		}
 	}
 	// 更新玩家信息
-	err = common.LocalRedisClient.UpdatePlayer(uuid, &map[string]interface{}{
-		"RoomId":     req.RoomId,
+	err = common.LocalRedisClient.UpdatePlayer(uuid, map[string]interface{}{
+		"RoomId":     *req.RoomId,
 		"PlayerType": 1,
 	})
 	if err != nil {
@@ -133,7 +141,7 @@ func PlayerQuitRoom(c *gin.Context) {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerQuitRoom 房间退出失败"})
 		return
 	}
-	err = common.LocalRedisClient.UpdatePlayer(uuid, &map[string]interface{}{
+	err = common.LocalRedisClient.UpdatePlayer(uuid, map[string]interface{}{
 		"RoomId":     "",
 		"PlayerType": 0,
 	})

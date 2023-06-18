@@ -44,9 +44,9 @@ func NewRoom(c *gin.Context) {
 			return
 		}
 	}
-	// 更新玩家信息
-	err = common.LocalRedisClient.UpdatePlayer(uuid, &map[string]interface{}{
-		"RoomId":     roomId,
+	// 更新玩家信息，不传指针
+	err = common.LocalRedisClient.UpdatePlayer(uuid, map[string]interface{}{
+		"RoomId":     *roomId,
 		"PlayerType": 1,
 	})
 	if err != nil {
@@ -65,5 +65,5 @@ func NewRoom(c *gin.Context) {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom Redis更新pos失败"})
 		return
 	}
-	c.JSON(200, gin.H{"code": 100, "data": req.Pos, "msg": "PlayerJoinRoom 房间信息更新失败"})
+	c.JSON(200, gin.H{"code": 100, "data": req.Pos, "msg": "PlayerJoinRoom 房间信息更新成功"})
 }

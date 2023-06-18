@@ -65,6 +65,9 @@ func newJwt(uuid *string) (*string, error) {
 
 // 验证jwt并解析uuid
 func verifyJwtUuid(jwt *string) (*string, error) {
+	if jwt == nil {
+		return nil, errors.New("jwt为空")
+	}
 	// 后续传输的参数可以考虑都通过 Jwt来完成 token 用来干啥
 	token, claims, err := common.ParseToken(*jwt)
 	if err != nil {

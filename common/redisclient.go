@@ -12,6 +12,12 @@ import (
 
 var LocalRedisClient *RedisClientApp
 
+const (
+	playerPrefix = "Player:"
+	roomPrefix   = "Room:"
+	posPrefix    = "Pos:"
+)
+
 type RedisClientApp struct {
 	client *redis.Client
 }
@@ -52,16 +58,17 @@ func (c *RedisClientApp) UpdatePos(pUuid *string, pos *model.Pos) error {
 		return err
 	}
 	// 字符串形式写入，超时时间为120s
-	if err := c.client.Set(ctx, *pUuid, valStr, 120*time.Second).Err(); err != nil {
+	if err := c.client.Set(ctx, posPrefix+*pUuid, valStr, 120*time.Minute).Err(); err != nil {
 		fmt.Println("写入错误")
 		return err
 	}
 	return nil
 }
 
+// 玩家信息更新，any不可以为指针或含有指针类型
 func (c *RedisClientApp) UpdatePlayer(key *string, val any) error {
 	ctx := context.Background()
-	if err := c.client.HMSet(ctx, *key, val).Err(); err != nil {
+	if err := c.client.HMSet(ctx, playerPrefix+*key, val).Err(); err != nil {
 		fmt.Printf("数据插入错误")
 		return err
 	} else {
@@ -76,11 +83,11 @@ func (c *RedisClientApp) UpdatePlayer(key *string, val any) error {
 func (c *RedisClientApp) UpdateRoom(pUuid *string, rId *string, action uint8) error {
 	ctx := context.Background()
 	if action == 0 {
-		if _, err := c.client.SRem(ctx, "Room:"+*rId, *pUuid).Result(); err != nil {
+		if _, err := c.client.SRem(ctx, roomPrefix+*rId, *pUuid).Result(); err != nil {
 			return err
 		}
 	} else if action == 1 {
-		if err := c.client.SAdd(ctx, "Room:"+*rId, *pUuid).Err(); err != nil {
+		if err := c.client.SAdd(ctx, roomPrefix+*rId, *pUuid).Err(); err != nil {
 			return err
 		}
 	}
@@ -89,7 +96,7 @@ func (c *RedisClientApp) UpdateRoom(pUuid *string, rId *string, action uint8) er
 
 func (c *RedisClientApp) GetPlayerInfoByField(key *string, fields *[]string) (*[]interface{}, error) {
 	ctx := context.Background()
-	vals, err := LocalRedisClient.client.HMGet(ctx, *key, *fields...).Result()
+	vals, err := LocalRedisClient.client.HMGet(ctx, playerPrefix+*key, *fields...).Result()
 	if err != nil {
 		return nil, err
 	}
