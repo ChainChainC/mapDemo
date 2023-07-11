@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"mapDemo/model"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 )
 
 var LocalRedisClient *RedisClientApp
-// var LocalRedisClient = NewRedisClientApp()
 
 const (
 	playerPrefix = "Player:"
@@ -28,7 +26,8 @@ func (c *RedisClientApp) checkClient() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 	if _, err := c.client.Ping(ctx).Result(); err != nil {
-		fmt.Printf("Connect Failed: %v \n", err)
+		// fmt.Printf("Connect Failed: %v \n", err)
+		log.WithError(err).Error("Redis connect FAILED.")
 		return err
 	}
 	return nil
@@ -55,12 +54,14 @@ func (c *RedisClientApp) UpdatePos(pUuid *string, pos *model.Pos) error {
 	// TODO：加入分布式锁
 	valStr, err := json.Marshal(pos)
 	if err != nil {
-		fmt.Printf("struct2str 错误")
+		// fmt.Printf("struct2str 错误")
+		log.WithError(err).Error("Redis struct2str 错误.")
 		return err
 	}
 	// 字符串形式写入，超时时间为120s
 	if err := c.client.Set(ctx, posPrefix+*pUuid, valStr, 120*time.Minute).Err(); err != nil {
-		fmt.Println("写入错误")
+		// fmt.Println("写入错误")
+		log.WithError(err).Error("Redis 写入错误.")
 		return err
 	}
 	return nil
@@ -70,10 +71,11 @@ func (c *RedisClientApp) UpdatePos(pUuid *string, pos *model.Pos) error {
 func (c *RedisClientApp) UpdatePlayer(key *string, val any) error {
 	ctx := context.Background()
 	if err := c.client.HMSet(ctx, playerPrefix+*key, val).Err(); err != nil {
-		fmt.Printf("数据插入错误")
+		// fmt.Printf("数据插入错误")
+		log.WithError(err).Error("Redis 数据插入错误.")
 		return err
 	} else {
-		fmt.Printf("数据写入成功")
+		// fmt.Printf("数据写入成功")
 		return nil
 	}
 }

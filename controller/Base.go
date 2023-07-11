@@ -8,7 +8,10 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.StandardLogger()
 
 // 新玩家连入
 func newPlayer(req *model.NewPlayerReq) *model.Player {

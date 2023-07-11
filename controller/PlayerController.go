@@ -6,11 +6,9 @@ import (
 	"mapDemo/model"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 var jwtKey = []byte("a_secret_crect")
-var log = logrus.StandardLogger()
 
 func NewPlayer(c *gin.Context) {
 	newPlayerRedis(c)
