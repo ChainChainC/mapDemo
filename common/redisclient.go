@@ -48,7 +48,7 @@ func NewRedisClientApp() {
 	}
 }
 
-// 更新坐标到redis
+// UpdatePos 更新坐标到redis
 func (c *RedisClientApp) UpdatePos(pUuid *string, pos *model.Pos) error {
 	ctx := context.Background()
 	// TODO：加入分布式锁
@@ -67,20 +67,18 @@ func (c *RedisClientApp) UpdatePos(pUuid *string, pos *model.Pos) error {
 	return nil
 }
 
-// 玩家信息更新，any不可以为指针或含有指针类型
+// UpdatePlayer 玩家信息更新，any不可以为指针或含有指针类型
 func (c *RedisClientApp) UpdatePlayer(key *string, val any) error {
 	ctx := context.Background()
 	if err := c.client.HMSet(ctx, playerPrefix+*key, val).Err(); err != nil {
-		// fmt.Printf("数据插入错误")
 		log.WithError(err).Error("Redis 数据插入错误.")
 		return err
 	} else {
-		// fmt.Printf("数据写入成功")
 		return nil
 	}
 }
 
-// 更新房间中玩家信息、Set 操作
+// UpdateRoom 更新房间中玩家信息、Set 操作
 // TODO: 后续需要开脚本定期清除没有玩家的房间
 // action 0 删除 1加入
 func (c *RedisClientApp) UpdateRoom(pUuid *string, rId *string, action uint8) error {
@@ -97,6 +95,7 @@ func (c *RedisClientApp) UpdateRoom(pUuid *string, rId *string, action uint8) er
 	return nil
 }
 
+// GetPlayerInfoByField 获取用户详细信息 Hash结果对象
 func (c *RedisClientApp) GetPlayerInfoByField(key *string, fields *[]string) (*[]interface{}, error) {
 	ctx := context.Background()
 	vals, err := LocalRedisClient.client.HMGet(ctx, playerPrefix+*key, *fields...).Result()
@@ -104,4 +103,24 @@ func (c *RedisClientApp) GetPlayerInfoByField(key *string, fields *[]string) (*[
 		return nil, err
 	}
 	return &vals, nil
+}
+
+// IsPlayerOnline 快速查询玩家是否在线（是否在redis中）
+func (c *RedisClientApp) IsPlayerOnline(key *string) (bool, error) {
+	ctx := context.Background()
+	exist, err := c.client.Exists(ctx, playerPrefix+(*key)).Result()
+	if err != nil {
+		return false, err
+	} else {
+		return exist == 1, nil
+	}
+}
+
+func (c *RedisClientApp) DeletePlayerInfo(key *string) (int64, error) {
+	ctx := context.Background()
+	count, err := c.client.Del(ctx, playerPrefix+(*key)).Result()
+	if err != nil {
+		return count, err
+	}
+	return count, nil
 }

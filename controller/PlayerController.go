@@ -19,7 +19,32 @@ func newPlayerRedis(c *gin.Context) {
 	c.BindJSON(baseReq)
 	if baseReq.Jwt != nil {
 		// 解析jwt，写入redis
-	} else {
+		uuid, err := verifyJwtUuid(baseReq.Jwt)
+		if err != nil {
+			// TODO：jwt验证过期另外逻辑处理
+			c.JSON(200, gin.H{"code": 100, "data": err, "msg": "VerifyJwt失败"})
+			log.Error("Player jwt verify FAILED.")
+			return
+		}
+		exist, err := common.LocalRedisClient.IsPlayerOnline(uuid)
+		if err != nil {
+			log.Error("NewPlayer exist verify with redis FAILED.")
+			return
+		}
+		// 在redis中查询到信息
+		if exist {
+			c.JSON(200, gin.H{"code": 200, "data": *baseReq.Code, "msg": "玩家存在"})
+			return
+		} else {
+			// TODO：完善
+			_, err := common.LocalRedisClient.DeletePlayerInfo(uuid)
+			if err != nil {
+				log.WithError(err).Error("del info with redis FAILED.")
+				return
+			}
+			c.JSON(200, gin.H{"code": 200, "data": *baseReq.Code, "msg": "清除之前缓存请重新登陆"})
+		}
+	} else { // 调用接口且不携带jwt
 		if baseReq.Code == nil {
 			c.JSON(200, gin.H{"code": 200, "data": "", "msg": "新玩家接入，未传入code"})
 			log.Warn("Player connect without Code.")
