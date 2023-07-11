@@ -6,9 +6,11 @@ import (
 	"mapDemo/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 var jwtKey = []byte("a_secret_crect")
+var log = logrus.StandardLogger()
 
 func NewPlayer(c *gin.Context) {
 	newPlayerRedis(c)
@@ -22,6 +24,7 @@ func newPlayerRedis(c *gin.Context) {
 	} else {
 		if baseReq.Code == nil {
 			c.JSON(200, gin.H{"code": 200, "data": "", "msg": "新玩家接入，未传入code"})
+			log.Warn("Player connect without Code.")
 			return
 		}
 		// 用code获取openId
@@ -30,6 +33,7 @@ func newPlayerRedis(c *gin.Context) {
 		jwt, err := newJwt(openId)
 		if err != nil {
 			c.JSON(200, gin.H{"code": 200, "data": *baseReq.Code, "msg": "新玩家接入时jwt签发失败"})
+			log.Error("New Player con with jwt FAILED.")
 			return
 		}
 		// TODO：直接更新，如果玩家在线，是不是无法连接回房间内
@@ -41,6 +45,7 @@ func newPlayerRedis(c *gin.Context) {
 		})
 		if err != nil {
 			c.JSON(200, gin.H{"code": 200, "data": *baseReq.Code, "msg": "玩家信息写入redis失败"})
+			log.Error("New player redis write FAILED.")
 		}
 		c.JSON(200, gin.H{"code": 200, "data": *baseReq.Code + " Jwt: " + *jwt, "msg": "新玩家接入"})
 	}
@@ -53,12 +58,14 @@ func PlayerUpdatePos(c *gin.Context) {
 	uuid, err := verifyJwtUuid(req.Jwt)
 	if err != nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "updatePos verifyJwt失败"})
+		log.Error("Player jwt verify FAILED.")
 		return
 	}
 	// 更新Pos
 	err = common.LocalRedisClient.UpdatePos(uuid, req.Pos)
 	if err != nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "updatePos Redis更新pos失败"})
+		log.Error("Player pos update with redis FAILED.")
 		return
 	}
 	// 在房间内
@@ -80,6 +87,7 @@ func PlayerJoinRoom(c *gin.Context) {
 	uuid, err := verifyJwtUuid(req.Jwt)
 	if err != nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom verifyJwt失败"})
+		log.Error("Player jwt verified FAILED.")
 		return
 	}
 	// 查询redis缓存字段，uuid RoomId，如果redis查不到，需要重新登录
@@ -87,6 +95,7 @@ func PlayerJoinRoom(c *gin.Context) {
 	vals, err := common.LocalRedisClient.GetPlayerInfoByField(uuid, fileds)
 	if err != nil || vals == nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 查询用户信息失败"})
+		log.Error("Player join room with redis FAILED.")
 		return
 	}
 	fmt.Print(vals)
@@ -103,10 +112,12 @@ func PlayerJoinRoom(c *gin.Context) {
 		rStr, ok := (*vals)[1].(string)
 		if !ok {
 			c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 房间号类型断言失败"})
+			log.Error("Player room id judge FAILED.")
 			return
 		}
 		if err := common.LocalRedisClient.UpdateRoom(uuid, &rStr, 0); err != nil {
 			c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 房间退出失败"})
+			log.Error("Player quit room with redis FAILED.")
 			return
 		}
 	}
@@ -117,12 +128,14 @@ func PlayerJoinRoom(c *gin.Context) {
 	})
 	if err != nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 玩家信息修改失败"})
+		log.Error("Player info update with redis FAILED.")
 		return
 	}
 	// 房间加入玩家uuid
 	err = common.LocalRedisClient.UpdateRoom(uuid, req.RoomId, 1)
 	if err != nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerJoinRoom 房间信息更新失败"})
+		log.Error("Player room info update with redis FAILED.")
 		return
 	}
 	// TODO：获取房间内玩家坐标返回
@@ -135,14 +148,19 @@ func PlayerQuitRoom(c *gin.Context) {
 	uuid, err := verifyJwtUuid(req.Jwt)
 	if err != nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerQuitRoom verifyJwt失败"})
+		log.Error("Player jwt verify FAILED.")
 		return
 	}
 	if err := common.LocalRedisClient.UpdateRoom(uuid, req.RoomId, 0); err != nil {
 		c.JSON(200, gin.H{"code": 100, "data": err, "msg": "PlayerQuitRoom 房间退出失败"})
+		log.Error("Player quit room with redis FAILED.")
 		return
 	}
 	err = common.LocalRedisClient.UpdatePlayer(uuid, map[string]interface{}{
 		"RoomId":     "",
 		"PlayerType": 0,
 	})
+	if err != nil {
+		log.Error("Player quit room update info with redis FAILED.")
+	}
 }

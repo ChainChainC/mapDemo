@@ -4,10 +4,16 @@ import (
 	"mapDemo/common"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.New()
 
 func init() {
 	common.NewRedisClientApp()
+	log.SetLevel(logrus.InfoLevel)
+	log.SetReportCaller(true)
+	// 默认情况下，日志输出到io.Stderr
 }
 
 func main() {
