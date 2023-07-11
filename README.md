@@ -50,7 +50,7 @@ The naming follow the style in https://google.github.io/styleguide/go/best-pract
 
 
 ### -----------------------------------------------
-jwt签发token, token中包含表名，用户id，地理位置
+jwt签发token, token中包含用户id
 
 数据库保存用户id和 昵称 
 
@@ -93,3 +93,19 @@ jwt签发token, token中包含表名，用户id，地理位置
 5、增加redis分布式锁（虽然似乎不太需要）
 
 持续：优化代码性能和美观
+
+### Redis目前存储的数据
+------玩家信息------
+hash表：玩家信息也用hash表存储
+{
+    "PlayerType": 0,
+	"RoomId":     "",
+}
+
+-----玩家坐标-------
+string：玩家坐标直接全局存储，面临频繁的读写
+Pos -> str -> 存入
+
+-----房间信息-------
+set：房间存储了当前在房间中的所有玩家
+：玩家uuid直接存入set中，代表房间内玩家
