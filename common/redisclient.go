@@ -37,9 +37,9 @@ func NewRedisClientApp() {
 	LocalRedisClient = &RedisClientApp{
 		client: redis.NewClient(
 			&redis.Options{
-				Addr:     "localhost:6379",
-				Password: "12345",
-				DB:       10,
+				Addr: "localhost:6379",
+				// Password: "12345",
+				DB: 10,
 			}),
 	}
 	// 检查连接redis是否成功

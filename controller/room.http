@@ -1,0 +1,14 @@
+## NewRoom 新建房间
+### 
+POST http://localhost:30022/api/room/NewRoom HTTP/1.1
+Content-Type: application/json
+
+{
+    "jwt":"",
+    "pos":{"x":2,"y":1,"z":0}
+}
+
+# type NewRoomBaseReq struct {
+# 	Jwt *string `json:"jwt"`
+# 	Pos *Pos    `json:"pos"`
+# }
