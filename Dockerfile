@@ -1,28 +1,9 @@
-# syntax=docker/dockerfile:1
-
-##
-## Build
-##
-FROM golang:1.18-alpine AS build
+FROM golang:1.18-alpine
 WORKDIR /app
-
 COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
-
 COPY *.go ./
-
-RUN CGO_ENABLED=0 GOOS=linux go build -o /mapDemo
-
-##
-## Deploy
-##
-FROM scratch
-
-WORKDIR /
-
-COPY --from=build /mapDemo /mapDemo
-
+RUN go build -o /mapDemo
 EXPOSE 30022
-
-ENTRYPOINT ["/mapDemo"]
+CMD [ "/mapDemo" ]
