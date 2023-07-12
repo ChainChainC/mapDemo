@@ -1,4 +1,4 @@
-syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
 #
 # Build
@@ -26,4 +26,4 @@ COPY --from=build /mapDemo /mapDemo
 EXPOSE 30022
 
 ENTRYPOINT ["/mapDemo"]
-# docker build -t docker-go-server-ping:multistage -f Dockerfile.multistage . 
+# docker build -t map-demo:multistage -f Dockerfile.multistage . 
