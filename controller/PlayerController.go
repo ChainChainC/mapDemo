@@ -91,6 +91,8 @@ func PlayerUpdatePos(c *gin.Context) {
 		log.Error("Player pos update with redis FAILED.")
 		return
 	}
+	// 更新缓存
+	updatePlayerPosCache(uuid, req.Pos)
 	// 在房间内
 	// TODO：是否在房间内需要从前端携带Type？那如果玩家掉线前端缓存出错会不会产生问题
 	if req.Type != 0 {
@@ -161,6 +163,7 @@ func PlayerJoinRoom(c *gin.Context) {
 		log.Error("Player room info update with redis FAILED.")
 		return
 	}
+	// TODO：缓存房间内玩家
 	// TODO：获取房间内玩家坐标返回
 }
 
@@ -185,5 +188,7 @@ func PlayerQuitRoom(c *gin.Context) {
 	})
 	if err != nil {
 		log.Error("Player quit room update info with redis FAILED.")
+		return
 	}
+	// TODO：房间内玩家缓存修改
 }

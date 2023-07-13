@@ -1,6 +1,7 @@
 package localcache
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -354,4 +355,35 @@ func Test_release(t *testing.T) {
 			release(tt.args.tv)
 		})
 	}
+}
+
+func Test_baseTest(t *testing.T) {
+	// var RoomUserCache Cache
+	// RoomUserCache, _ = NewLRUCache(20, 10*time.Second)
+	// RoomUserCache.Set("a", "a")
+	lru, err := NewLRUCache(20, 10*time.Second)
+	if err != nil {
+		fmt.Print("new lru cache failed.")
+		t.Fail()
+	}
+	lru.Set("RoomId", []string{"userId1", "userId2"})
+	res, exp := lru.Get("RoomId")
+	if exp {
+		fmt.Println(res)
+		fmt.Println(reflect.TypeOf(res))
+	}
+	key := "Roomii"
+	go func() {
+		lru.Set(key, "ss")
+	}()
+	time.Sleep(5 * time.Second)
+	res, exp = lru.Get(key)
+	if exp {
+		fmt.Print(res)
+	}
+	res, exp = lru.Get("RoomId")
+	if exp {
+		fmt.Print(res)
+	}
+	// fmt.Print(lru.Get("RoomId"))
 }

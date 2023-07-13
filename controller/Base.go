@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"mapDemo/common"
+	"mapDemo/common/localcache"
 	"mapDemo/model"
 	"math"
 	"time"
@@ -11,7 +12,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var log = logrus.StandardLogger()
+var (
+	log             = logrus.StandardLogger()
+	RoomPlayerCache localcache.Cache
+	PlayerPosCache  localcache.Cache
+)
+
+func LocalCacheInit() {
+	RoomPlayerCache, _ = localcache.NewLRUCache(20, 10*time.Second)
+	PlayerPosCache, _ = localcache.NewLRUCache(50, 5*time.Second)
+}
 
 // 新玩家连入
 func newPlayer(req *model.NewPlayerReq) *model.Player {
@@ -90,7 +100,7 @@ func verifyJwtUuid(jwt *string) (*string, error) {
 	return &claims.Uuid, nil
 }
 
-// 计算可见玩家坐标
+// getPlayerPosInsight 计算可见玩家坐标
 func getPlayerPosInsight(p *model.Player) []*model.Player {
 	allP := model.RoomIdMap[p.RoomId].AllPlayer
 	res := make([]*model.Player, 2)
@@ -106,4 +116,11 @@ func getPlayerPosInsight(p *model.Player) []*model.Player {
 		}
 	}
 	return res
+}
+
+// ---------- cache -------------
+
+// updatePlayerPosCache更新玩家缓存
+func updatePlayerPosCache(pUuid *string, pos *model.Pos) {
+	PlayerPosCache.Set(*pUuid, *pos)
 }
