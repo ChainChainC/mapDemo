@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,4 +32,10 @@ func Logger() *log.Entry {
 	funcname := runtime.FuncForPC(pc).Name()
 	fn := funcname[strings.LastIndex(funcname, ".")+1:]
 	return log.WithField("file", filename).WithField("function", fn)
+}
+
+func LoggerMiddleWare() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+	}
 }

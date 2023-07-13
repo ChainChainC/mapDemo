@@ -142,3 +142,24 @@ func TestHash(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestDelete(t *testing.T) {
+	NewRedisClientApp()
+	defer LocalRedisClient.client.Close()
+	// 用户更新key: Player:uuid map[string]interface{}
+	key := "uuid1"
+	err := LocalRedisClient.UpdatePlayer(&key, map[string]interface{}{
+		"PlayerType": 0,
+		"RoomId":     "",
+	})
+	if err != nil {
+		fmt.Printf("数据写入错误")
+	}
+	count, err := LocalRedisClient.DeletePlayerInfo(&key)
+	if err != nil {
+		fmt.Printf("数据删除错误")
+		t.Fail()
+	} else {
+		fmt.Printf("数据删除成功: %d", count)
+	}
+}

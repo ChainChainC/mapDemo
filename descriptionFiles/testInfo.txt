@@ -1,0 +1,21 @@
+Player:
+player1
+{
+    "code":"Aaaaaaaa",
+    "nickName":"aaa"
+}
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiQWFhYWFhYWEiLCJleHAiOjE2ODcwNjIzMjgsImlhdCI6MTY4NzA1NTEyOCwiaXNzIjoiTWFwIiwic3ViIjoidXNlciB0b2tlbiJ9.m0MX5NSRUueKcZLPUuiqx71au0xvGZ4qacwhv8W_QT4
+player2
+{
+    "code":"baaaaaaa",
+    "nickName":"baa"
+}
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiYmFhYWFhYWEiLCJleHAiOjE2ODcwNjIzNDEsImlhdCI6MTY4NzA1NTE0MSwiaXNzIjoiTWFwIiwic3ViIjoidXNlciB0b2tlbiJ9.twTrGRTjhUzZx17NHJ1BrTvB5I6HgR2u3CS47uqO-JM
+
+player3
+{
+    "code":"caaaaaaa",
+    "nickName":"caa"
+}
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiY2FhYWFhYWEiLCJleHAiOjE2ODcwNjIzNTYsImlhdCI6MTY4NzA1NTE1NiwiaXNzIjoiTWFwIiwic3ViIjoidXNlciB0b2tlbiJ9.tbYLbN36v_S-Yo1ViImCE0UxF-IuIeH_Fe9uRbRnt6I
+Room:

@@ -3,12 +3,25 @@ package controller
 import (
 	"errors"
 	"mapDemo/common"
+	"mapDemo/common/localcache"
 	"mapDemo/model"
 	"math"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 )
+
+var (
+	log             = logrus.StandardLogger()
+	RoomPlayerCache localcache.Cache
+	PlayerPosCache  localcache.Cache
+)
+
+func LocalCacheInit() {
+	RoomPlayerCache, _ = localcache.NewLRUCache(20, 10*time.Second)
+	PlayerPosCache, _ = localcache.NewLRUCache(50, 5*time.Second)
+}
 
 // 新玩家连入
 func newPlayer(req *model.NewPlayerReq) *model.Player {
@@ -65,6 +78,9 @@ func newJwt(uuid *string) (*string, error) {
 
 // 验证jwt并解析uuid
 func verifyJwtUuid(jwt *string) (*string, error) {
+	if jwt == nil {
+		return nil, errors.New("jwt为空")
+	}
 	// 后续传输的参数可以考虑都通过 Jwt来完成 token 用来干啥
 	token, claims, err := common.ParseToken(*jwt)
 	if err != nil {
@@ -84,7 +100,7 @@ func verifyJwtUuid(jwt *string) (*string, error) {
 	return &claims.Uuid, nil
 }
 
-// 计算可见玩家坐标
+// getPlayerPosInsight 计算可见玩家坐标
 func getPlayerPosInsight(p *model.Player) []*model.Player {
 	allP := model.RoomIdMap[p.RoomId].AllPlayer
 	res := make([]*model.Player, 2)
@@ -100,4 +116,11 @@ func getPlayerPosInsight(p *model.Player) []*model.Player {
 		}
 	}
 	return res
+}
+
+// ---------- cache -------------
+
+// updatePlayerPosCache更新玩家缓存
+func updatePlayerPosCache(pUuid *string, pos *model.Pos) {
+	PlayerPosCache.Set(*pUuid, *pos)
 }

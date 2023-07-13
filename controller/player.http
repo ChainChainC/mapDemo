@@ -1,0 +1,86 @@
+## NewPlayer 新玩家连入
+### 新玩家接入
+POST http://localhost:30022/api/player/NewPlayer HTTP/1.1
+Content-Type: application/json
+
+{
+    "code":"Aaaaaaaa",
+    "nickName":"aaa"
+}
+
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiQWFhYWFhYWEiLCJleHAiOjE2ODkwNjY1MDYsImlhdCI6MTY4OTA1OTMwNiwiaXNzIjoiTWFwIiwic3ViIjoidXNlciB0b2tlbiJ9.eh6aZ98GtSQ6Uk731EiSKaNLUdiJWtXWCYC8XFSSmHA
+
+## NewPlayer 新玩家连入
+### 新玩家接入
+POST http://localhost:30022/api/player/NewPlayer HTTP/1.1
+Content-Type: application/json
+
+{
+    "code":"baaaaaaa",
+    "nickName":"baa"
+}
+
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiYmFhYWFhYWEiLCJleHAiOjE2ODkwNjY1MjgsImlhdCI6MTY4OTA1OTMyOCwiaXNzIjoiTWFwIiwic3ViIjoidXNlciB0b2tlbiJ9.hARaXy1uOf7yDPLFSfZgyYW69RiXLVdms_PJBuFZ4rU
+
+## NewPlayer 新玩家连入
+### 新玩家接入
+POST http://localhost:30022/api/player/NewPlayer HTTP/1.1
+Content-Type: application/json
+
+{
+    "code":"caaaaaaa",
+    "nickName":"caa"
+} 
+
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiY2FhYWFhYWEiLCJleHAiOjE2ODkwNjY1NjAsImlhdCI6MTY4OTA1OTM2MCwiaXNzIjoiTWFwIiwic3ViIjoidXNlciB0b2tlbiJ9._AOhuY_gopIX7AQvyjJ60kwmmuEI3UgT-TRgAuoENRo
+
+## PlayerUpdatePos 玩家更新位置
+### 
+POST http://localhost:30022/api/player/PlayerUpdatePos HTTP/1.1
+Content-Type: application/json
+
+{
+    "jwt":,
+    "pos":{"x":2,"y":1,"z":0},
+    "type":,
+    "roomId":,
+}
+
+# type PlayerUpdatePosBaseReq struct {
+# 	Jwt    *string `json:"jwt"`
+# 	Pos    *Pos    `json:"pos"`
+# 	Type   uint8   `json:"type"`
+# 	RoomId *string `json:"roomId"`
+# }
+
+## PlayerJoinRoom 玩家加入房间
+### 
+POST http://localhost:30022/api/player/PlayerJoinRoom HTTP/1.1
+Content-Type: application/json
+
+{
+    "jwt":"",
+    "roomId":"",
+    "pos":{"x":2,"y":1,"z":0},
+}
+
+# type PlayerJoinRoomBaseReq struct {
+# 	Jwt    *string `json:"jwt"`
+# 	RoomId *string `json:"roomId"`
+# 	Pos    *Pos    `json:"pos"`
+# }
+
+## PlayerQuitRoom 玩家退出房间
+### 
+POST http://localhost:30022/api/player/PlayerQuitRoom HTTP/1.1
+Content-Type: application/json
+
+{
+    "jwt":"",
+    "roomId":""
+}
+
+# type PlayerQuitRoomBaseReq struct {
+# 	Jwt    *string `json:"jwt"`
+# 	RoomId *string `json:"roomId"`
+# }
