@@ -1,0 +1,32 @@
+api/room/NewRoom
+type NewRoomBaseReq struct {
+	Jwt *string `json:"jwt"`
+	Pos *Pos    `json:"pos"`
+}
+
+api/player/NewPlayer
+type NewPlayerBaseReq struct {
+	Code *string `Json:"code"`
+	Jwt  *string `json:"jwt"`
+}
+
+api/player/PlayerUpdatePos
+type PlayerUpdatePosBaseReq struct {
+	Jwt    *string `json:"jwt"`
+	Pos    *Pos    `json:"pos"`
+	Type   uint8   `json:"type"`
+	RoomId *string `json:"roomId"`
+}
+
+api/player/PlayerJoinRoom
+type PlayerJoinRoomBaseReq struct {
+	Jwt    *string `json:"jwt"`
+	RoomId *string `json:"roomId"`
+	Pos    *Pos    `json:"pos"`
+}
+
+api/player/PlayerQuitRoom
+type PlayerQuitRoomBaseReq struct {
+	Jwt    *string `json:"jwt"`
+	RoomId *string `json:"roomId"`
+}
